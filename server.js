@@ -24,7 +24,9 @@ app.post('/api/exchange_token', async (req, res) => {
   const data = await response.json();
   if (data.access_token) {
     // Send the access token back to the Flutter app or handle it as needed
-    res.json({ token: data.access_token });
+    // res.json({ token: data.access_token });
+    res.redirect(`myappoauth://callback?token=${data.access_token}`);
+
   } else {
     // Handle error
     res.status(400).send('Failed to exchange token');
