@@ -43,6 +43,40 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
+
+app.get('/oauth/callback', async (req, res) => {
+  const code = req.query.code;
+  const state = req.query.state;
+  const clientId = '5160eb77-b490-49ec-a4be-db702bb0a1bb';
+  const clientSecret = 'secret_FiSK7g3jj1YwNcl03UmRWFp5Lnr3QmO0NggnaEBjbfY';
+
+  // Continue with the token exchange process
+  const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
+  const response = await fetch('https://api.notion.com/v1/oauth/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: 'https://notion-server-two.vercel.app/oauth/callback',
+      client_id: clientId,
+      client_secret: clientSecret,
+    }),
+  });
+
+  const data = await response.json();
+  if (data.access_token) {
+    // Redirect to your app with the token in the URL
+    res.redirect(`myappoauth://callback?token=${data.access_token}&state=${state}`);
+  } else {
+    // Handle error
+    res.status(400).send('Failed to exchange token');
+  }
+});
+
 app.post('/api/exchange_token', async (req, res) => {
   const code = req.body.code;
   const clientId = '5160eb77-b490-49ec-a4be-db702bb0a1bb';
